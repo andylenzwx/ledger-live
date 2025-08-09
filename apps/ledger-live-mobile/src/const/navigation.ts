@@ -157,6 +157,7 @@ export enum ScreenName {
   SignValidationError = "SignValidationError",
   SignValidationSuccess = "SignValidationSuccess",
   Swap = "Swap",
+  SwapCustomError = "SwapCustomError",
   SwapError = "SwapError",
   SwapForm = "SwapForm",
   SwapFormAmount = "SwapFormAmount",
@@ -555,8 +556,10 @@ export enum ScreenName {
   WalletSyncManageInstancesProcess = "WalletSyncManageInstancesProcess",
   WalletSyncManageInstancesSuccess = "WalletSyncManageInstancesSuccess",
   LedgerSyncDeepLinkHandler = "LedgerSyncDeepLinkHandler",
+  ModularDrawerDeepLinkHandler = "ModularDrawerDeepLinkHandler",
 
   MockedAddAssetButton = "MockedAddAssetButton",
+  MockedModularDrawer = "MockedModularDrawer",
   MockedWalletScreen = "MockedWalletScreen",
   GenericLandingPage = "GenericLandingPage",
 
@@ -700,6 +703,7 @@ export enum NavigatorName {
   Web3HubTab = "Web3HubTab",
 
   WalletSync = "WalletSync",
+  ModularDrawer = "ModularDrawer",
   AssetSelection = "AssetSelection",
   DeviceSelection = "DeviceSelection",
   Assets = "Assets",

@@ -1,23 +1,20 @@
-import pick from "lodash/pick";
 import type { SuiAccount, Transaction } from "../types";
-import { craftTransaction, type CreateExtrinsicArg } from "../logic";
-
-export const extractExtrinsicArg = (transaction: Transaction): CreateExtrinsicArg =>
-  pick(transaction, ["mode", "amount", "recipient", "useAllAmount", "coinType"]);
+import { craftTransaction } from "../logic";
+import { toSuiAsset } from "../network/sdk";
 
 /**
  * @param {Account} account
  * @param {Transaction} transaction
  */
 export const buildTransaction = async (
-  { freshAddress }: SuiAccount,
-  { recipient, mode, amount }: Transaction,
+  account: SuiAccount,
+  { recipient, mode, amount, coinType }: Transaction,
 ) => {
   return craftTransaction({
-    sender: freshAddress,
+    sender: account.freshAddress,
     recipient,
     type: mode,
     amount: BigInt(amount.toString()),
-    asset: { type: "native" },
+    asset: toSuiAsset(coinType),
   });
 };

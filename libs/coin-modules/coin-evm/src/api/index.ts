@@ -1,22 +1,33 @@
 import {
   Balance,
+  Block,
   BlockInfo,
   FeeEstimation,
   MemoNotSupported,
   Operation,
   Pagination,
   TransactionIntent,
+  Cursor,
+  Page,
+  Stake,
+  Reward,
   type AlpacaApi,
 } from "@ledgerhq/coin-framework/api/index";
 import { getCryptoCurrencyById } from "@ledgerhq/cryptoassets/currencies";
 import { CryptoCurrencyId } from "@ledgerhq/types-cryptoassets";
 import { BroadcastConfig } from "@ledgerhq/types-live";
 import { setCoinConfig, type EvmConfig } from "../config";
-import { broadcast, combine, lastBlock } from "../logic/";
-import { EvmAsset } from "../types";
-import { craftTransaction } from "../logic/craftTransaction";
+import {
+  broadcast,
+  combine,
+  craftTransaction,
+  estimateFees,
+  lastBlock,
+  listOperations,
+  getBalance,
+} from "../logic/index";
 
-export function createApi(config: EvmConfig, currencyId: CryptoCurrencyId): AlpacaApi<EvmAsset> {
+export function createApi(config: EvmConfig, currencyId: CryptoCurrencyId): AlpacaApi {
   setCoinConfig(() => ({ info: { ...config, status: { type: "active" } } }));
   const currency = getCryptoCurrencyById(currencyId);
 
@@ -25,22 +36,30 @@ export function createApi(config: EvmConfig, currencyId: CryptoCurrencyId): Alpa
       broadcast(currency, { signature: tx, broadcastConfig }),
     combine,
     craftTransaction: (
-      transactionIntent: TransactionIntent<EvmAsset, MemoNotSupported>,
-    ): Promise<string> => craftTransaction(currency, { transactionIntent }),
+      transactionIntent: TransactionIntent<MemoNotSupported>,
+      customFees?: FeeEstimation,
+    ): Promise<string> => craftTransaction(currency, { transactionIntent, customFees }),
     estimateFees: (
-      _transactionIntent: TransactionIntent<EvmAsset, MemoNotSupported>,
-    ): Promise<FeeEstimation> => {
-      throw new Error("UnsupportedMethod");
-    },
-    getBalance: (_address: string): Promise<Balance<EvmAsset>[]> => {
-      throw new Error("UnsupportedMethod");
-    },
+      transactionIntent: TransactionIntent<MemoNotSupported>,
+    ): Promise<FeeEstimation> => estimateFees(currency, transactionIntent),
+    getBalance: (address: string): Promise<Balance[]> => getBalance(currency, address),
     lastBlock: (): Promise<BlockInfo> => lastBlock(currency),
     listOperations: (
-      _address: string,
-      _pagination: Pagination,
-    ): Promise<[Operation<EvmAsset, MemoNotSupported>[], string]> => {
-      throw new Error("UnsupportedMethod");
+      address: string,
+      pagination: Pagination,
+    ): Promise<[Operation<MemoNotSupported>[], string]> =>
+      listOperations(currency, address, pagination),
+    getBlock(_height): Promise<Block> {
+      throw new Error("getBlock is not supported");
+    },
+    getBlockInfo(_height: number): Promise<BlockInfo> {
+      throw new Error("getBlockInfo is not supported");
+    },
+    getStakes(_address: string, _cursor?: Cursor): Promise<Page<Stake>> {
+      throw new Error("getStakes is not supported");
+    },
+    getRewards(_address: string, _cursor?: Cursor): Promise<Page<Reward>> {
+      throw new Error("getRewards is not supported");
     },
   };
 }

@@ -1,8 +1,14 @@
-import type {
+import {
   Api,
+  Block,
+  BlockInfo,
+  Cursor,
+  Page,
   FeeEstimation,
   Operation,
   Pagination,
+  Reward,
+  Stake,
   TransactionIntent,
 } from "@ledgerhq/coin-framework/api/index";
 import { log } from "@ledgerhq/logs";
@@ -18,10 +24,11 @@ import {
   lastBlock,
   listOperations,
   getTransactionStatus,
+  MemoInput,
 } from "../logic";
-import { ListOperationsOptions, XrpAsset, XrpMapMemo } from "../types";
+import { ListOperationsOptions, XrpMapMemo } from "../types";
 
-export function createApi(config: XrpConfig): Api<XrpAsset, XrpMapMemo> {
+export function createApi(config: XrpConfig): Api<XrpMapMemo> {
   coinConfig.setCoinConfig(() => ({ ...config, status: { type: "active" } }));
 
   return {
@@ -34,15 +41,27 @@ export function createApi(config: XrpConfig): Api<XrpAsset, XrpMapMemo> {
     listOperations: operations,
     validateIntent: getTransactionStatus,
     getAccountInfo,
+    getBlock(_height): Promise<Block> {
+      throw new Error("getBlock is not supported");
+    },
+    getBlockInfo(_height: number): Promise<BlockInfo> {
+      throw new Error("getBlockInfo is not supported");
+    },
+    getStakes(_address: string, _cursor?: Cursor): Promise<Page<Stake>> {
+      throw new Error("getStakes is not supported");
+    },
+    getRewards(_address: string, _cursor?: Cursor): Promise<Page<Reward>> {
+      throw new Error("getRewards is not supported");
+    },
   };
 }
 
 async function craft(
-  transactionIntent: TransactionIntent<XrpAsset, XrpMapMemo>,
-  customFees?: bigint,
+  transactionIntent: TransactionIntent<XrpMapMemo>,
+  customFees?: FeeEstimation,
 ): Promise<string> {
   const nextSequenceNumber = await getNextValidSequence(transactionIntent.sender);
-  const estimatedFees = customFees !== undefined ? customFees : (await estimateFees()).fee;
+  const estimatedFees = customFees?.value ?? (await estimateFees()).fee;
 
   const memosMap =
     transactionIntent.memo?.type === "map" ? transactionIntent.memo.memos : new Map();
@@ -53,7 +72,7 @@ async function craft(
 
   const memoStrings = memosMap.get("memos") as string[] | undefined;
 
-  let memoEntries: { type: string; data: string }[] = [];
+  let memoEntries: MemoInput[] | undefined = undefined;
 
   if (Array.isArray(memoStrings) && memoStrings.length > 0) {
     memoEntries = memoStrings.map(value => ({ type: "memo", data: value }));
@@ -87,13 +106,13 @@ type PaginationState = {
   readonly minHeight: number;
   continueIterations: boolean;
   apiNextCursor?: string;
-  accumulator: Operation<XrpAsset>[];
+  accumulator: Operation[];
 };
 
 async function operationsFromHeight(
   address: string,
   minHeight: number,
-): Promise<[Operation<XrpAsset>[], string]> {
+): Promise<[Operation[], string]> {
   async function fetchNextPage(state: PaginationState): Promise<PaginationState> {
     const options: ListOperationsOptions = {
       limit: state.pageSize,
@@ -141,7 +160,6 @@ async function operationsFromHeight(
 async function operations(
   address: string,
   { minHeight }: Pagination,
-): Promise<[Operation<XrpAsset>[], string]> {
-  // TODO token must be implemented properly (waiting ack from the design document)
+): Promise<[Operation[], string]> {
   return await operationsFromHeight(address, minHeight);
 }

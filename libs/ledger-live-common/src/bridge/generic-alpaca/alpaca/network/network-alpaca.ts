@@ -1,6 +1,7 @@
-import type {
+import {
   Account,
   Balance,
+  Block,
   BlockInfo,
   Operation,
   FeeEstimation,
@@ -10,6 +11,10 @@ import type {
   TransactionValidation,
   AccountInfo,
   Api,
+  Cursor,
+  Page,
+  Stake,
+  Reward,
 } from "@ledgerhq/coin-framework/api/index";
 import network from "@ledgerhq/live-network";
 
@@ -106,14 +111,9 @@ const buildValidateIntent = (networkFamily: string) =>
     return data;
   };
 
-// FIXME: shouldn't hardcode
-type AssetInfo = {
-  type: "native"; // or "token" if applicable
-};
-
 const buildGetBalance = (networkFamily: string) =>
-  async function getBalance(address: string): Promise<Balance<AssetInfo>[]> {
-    const { data } = await network<Balance<AssetInfo>, unknown>({
+  async function getBalance(address: string): Promise<Balance[]> {
+    const { data } = await network<Balance, unknown>({
       method: "GET",
       url: `${ALPACA_URL}/${networkFamily}/account/${address}/balance`,
     });
@@ -190,4 +190,16 @@ export const getNetworkAlpacaApi = (networkFamily: string) =>
     listOperations: buildListOperations(networkFamily),
     lastBlock: buildLastBlock(networkFamily),
     craftTransaction: buildCraftTransaction(networkFamily),
+    getBlock(_height): Promise<Block> {
+      throw new Error("getBlock is not supported");
+    },
+    getBlockInfo(_height: number): Promise<BlockInfo> {
+      throw new Error("getBlockInfo is not supported");
+    },
+    getStakes(_address: string, _cursor?: Cursor): Promise<Page<Stake>> {
+      throw new Error("getStakes is not supported");
+    },
+    getRewards(_address: string, _cursor?: Cursor): Promise<Page<Reward>> {
+      throw new Error("getRewards is not supported");
+    },
   }) satisfies Api<any>;

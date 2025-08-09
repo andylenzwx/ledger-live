@@ -202,6 +202,11 @@ const envDefinitions = {
     def: "https://solana.coin.ledger.com",
     desc: "proxy url for solana API",
   },
+  API_SUI_NODE_PROXY_TEST: {
+    parser: stringParser,
+    def: "https://sui.coin.ledger-test.com",
+    desc: "reverse proxy url for sui node",
+  },
   API_SUI_NODE_PROXY: {
     parser: stringParser,
     def: "https://sui.coin.ledger.com",
@@ -650,6 +655,11 @@ const envDefinitions = {
     def: 0,
     parser: intParser,
     desc: "API port for speculos",
+  },
+  SPECULOS_DEVICE: {
+    def: "",
+    parser: stringParser,
+    desc: "Device model id for speculos",
   },
   SPECULOS_PID_OFFSET: {
     def: 0,

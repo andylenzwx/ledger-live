@@ -77,7 +77,7 @@ const validators = [
     xrayTicket: "B2CQA-2732, B2CQA-2765",
   },
   {
-    delegate: new Delegate(Account.ADA_2, "0.01", "Ledger by Figment 2"),
+    delegate: new Delegate(Account.ADA_2, "0.01", "Ledger by Figment 4"),
     xrayTicket: "B2CQA-2766",
   },
   {
@@ -96,11 +96,11 @@ const liveApps = [
     xrayTicket: "B2CQA-3024",
   },
   {
-    delegate: new Delegate(Account.TRX_1, "1", "stakekit"),
+    delegate: new Delegate(Account.TRX_1, "1", "yield.xyz"),
     xrayTicket: "B2CQA-3025", //todo: Add split from when parent ticket is available
   },
   {
-    delegate: new Delegate(Account.DOT_1, "1", "stakekit"),
+    delegate: new Delegate(Account.DOT_1, "1", "yield.xyz"),
     xrayTicket: "B2CQA-3026", //todo: Add split from when parent ticket is available
   },
 ];
@@ -211,11 +211,11 @@ for (const account of e2eDelegationAccountsWithoutBroadcast) {
         await app.account.startStakingFlowFromMainStakeButton();
         await app.delegate.continue();
 
-        if (
-          account.delegate.account.currency.name == Currency.ADA.name ||
-          account.delegate.account.currency.name == Currency.APT.name
-        ) {
+        if (account.delegate.account.currency.name == Currency.ADA.name) {
           await app.delegate.openSearchProviderModal();
+          await app.delegate.inputProvider(account.delegate.provider);
+          await app.delegate.selectProviderByName(account.delegate.provider);
+        } else if (account.delegate.account.currency.name == Currency.APT.name) {
           await app.delegate.inputProvider(account.delegate.provider);
           await app.delegate.selectProviderByName(account.delegate.provider);
         } else {
@@ -402,7 +402,7 @@ for (const validator of validators) {
 }
 
 test.describe("Staking flow from different entry point", () => {
-  const delegateAccount = new Delegate(Account.ATOM_1, "0.001", "Ledger");
+  const delegateAccount = new Delegate(Account.ATOM_1, "0.001", "Ledger by Chorus One");
   test.use({
     userdata: "skip-onboarding",
     speculosApp: delegateAccount.account.currency.speculosApp,

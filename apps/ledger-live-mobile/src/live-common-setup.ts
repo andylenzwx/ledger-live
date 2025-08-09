@@ -104,6 +104,9 @@ setSupportedCurrencies([
   "base_sepolia",
   "stacks",
   "telos_evm",
+  "sei_network_evm",
+  "berachain",
+  "hyperevm",
   "coreum",
   "injective",
   "casper",
@@ -129,6 +132,7 @@ setSupportedCurrencies([
   "sonic_blaze",
   "mina",
   "babylon",
+  "canton_network",
 ]);
 
 if (Config.FORCE_PROVIDER && !isNaN(parseInt(Config.FORCE_PROVIDER, 10)))
